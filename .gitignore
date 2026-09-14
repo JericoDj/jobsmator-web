@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# JobsMator
+.env
+.env.*
+!.env.example
+.DS_Store

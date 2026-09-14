@@ -1,26 +1,69 @@
 @import "tailwindcss";
 
+/* JobsMator design tokens — docs/design-guide.html v1.1 */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --jm-cobalt: #1E5EFF;   --jm-azure: #2EA8FF;   --jm-match: #16C172;   --jm-volt: #FFE600;
+  --jm-cobalt-deep: #163FB8; --jm-azure-deep: #0B6FD1; --jm-match-deep: #0A7F45; --jm-volt-deep: #7A6200;
+  --jm-cobalt-tint: #E4ECFF; --jm-azure-tint: #E0F3FF; --jm-match-tint: #DCF9EA; --jm-volt-tint: #FFF9C2;
+  --jm-danger: #E03131; --jm-danger-tint: #FFE6E6; --jm-warning: #D97706; --jm-warning-tint: #FFF1DB;
+  --jm-ink: #0B1F3A; --jm-text: #22354F; --jm-muted: #5A6B82; --jm-faint: #8C9BB0;
+  --jm-line: #D3DCEA; --jm-line-strong: #B8C5D8; --jm-surface: #F2F5FB; --jm-surface-2: #E6EBF5;
+  --jm-ground: #FFFFFF; --jm-card: #FFFFFF;
+  --jm-shadow: 0 1px 2px rgba(11,31,58,.08), 0 8px 24px rgba(11,31,58,.12);
+  --jm-focus: 0 0 0 3px rgba(46,168,255,.5);
+  color-scheme: light;
 }
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --jm-cobalt: #3B78FF; --jm-cobalt-deep: #8FB0FF; --jm-match-deep: #5EE6A0; --jm-azure-deep: #86CFFF; --jm-volt-deep: #FFE84D;
+    --jm-cobalt-tint: #132A5C; --jm-azure-tint: #0F2C48; --jm-match-tint: #0C3A26; --jm-volt-tint: #3D3600;
+    --jm-danger: #FF6B6B; --jm-danger-tint: #4A1A1A; --jm-warning: #FBBF24; --jm-warning-tint: #433012;
+    --jm-ink: #EEF3FA; --jm-text: #C9D4E3; --jm-muted: #8C9BB0; --jm-faint: #5F6F86;
+    --jm-line: #1F2E48; --jm-line-strong: #2C3D5C; --jm-surface: #0B162B; --jm-surface-2: #16233D;
+    --jm-ground: #070F1F; --jm-card: #0F1B33;
+    --jm-shadow: 0 1px 2px rgba(0,0,0,.5), 0 8px 24px rgba(0,0,0,.45);
+    color-scheme: dark;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme inline {
+  --color-cobalt: var(--jm-cobalt);
+  --color-cobalt-deep: var(--jm-cobalt-deep);
+  --color-cobalt-tint: var(--jm-cobalt-tint);
+  --color-azure: var(--jm-azure);
+  --color-azure-deep: var(--jm-azure-deep);
+  --color-azure-tint: var(--jm-azure-tint);
+  --color-match: var(--jm-match);
+  --color-match-deep: var(--jm-match-deep);
+  --color-match-tint: var(--jm-match-tint);
+  --color-volt: var(--jm-volt);
+  --color-volt-deep: var(--jm-volt-deep);
+  --color-volt-tint: var(--jm-volt-tint);
+  --color-danger: var(--jm-danger);
+  --color-danger-tint: var(--jm-danger-tint);
+  --color-ink: var(--jm-ink);
+  --color-text: var(--jm-text);
+  --color-muted: var(--jm-muted);
+  --color-line: var(--jm-line);
+  --color-line-strong: var(--jm-line-strong);
+  --color-surface: var(--jm-surface);
+  --color-surface-2: var(--jm-surface-2);
+  --color-ground: var(--jm-ground);
+  --color-card: var(--jm-card);
+  --font-sans: var(--font-instrument-sans), system-ui, sans-serif;
+  --font-display: var(--font-outfit), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-card: var(--jm-shadow);
 }
+
+body {
+  background: var(--jm-ground);
+  color: var(--jm-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4 { font-family: var(--font-display); color: var(--jm-ink); text-wrap: balance; }
+:focus-visible { outline: 3px solid var(--jm-azure); outline-offset: 2px; }
