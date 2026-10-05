@@ -11,21 +11,13 @@
   --jm-ground: #FFFFFF; --jm-card: #FFFFFF;
   --jm-shadow: 0 1px 2px rgba(11,31,58,.08), 0 8px 24px rgba(11,31,58,.12);
   --jm-focus: 0 0 0 3px rgba(46,168,255,.5);
+  /*
+   * Light only, deliberately. The palette, the tinted cards and the ink panels
+   * were drawn for a light ground; a dark repaint of them read as a different
+   * product, so the site declares one scheme and keeps it on every device.
+   */
   color-scheme: light;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --jm-cobalt: #3B78FF; --jm-cobalt-deep: #8FB0FF; --jm-match-deep: #5EE6A0; --jm-azure-deep: #86CFFF; --jm-volt-deep: #FFE84D;
-    --jm-cobalt-tint: #132A5C; --jm-azure-tint: #0F2C48; --jm-match-tint: #0C3A26; --jm-volt-tint: #3D3600;
-    --jm-danger: #FF6B6B; --jm-danger-tint: #4A1A1A; --jm-warning: #FBBF24; --jm-warning-tint: #433012;
-    --jm-ink: #EEF3FA; --jm-text: #C9D4E3; --jm-muted: #8C9BB0; --jm-faint: #5F6F86;
-    --jm-line: #1F2E48; --jm-line-strong: #2C3D5C; --jm-surface: #0B162B; --jm-surface-2: #16233D;
-    --jm-ground: #070F1F; --jm-card: #0F1B33;
-    --jm-shadow: 0 1px 2px rgba(0,0,0,.5), 0 8px 24px rgba(0,0,0,.45);
-    color-scheme: dark;
-  }
-}
-
 @theme inline {
   --color-cobalt: var(--jm-cobalt);
   --color-cobalt-deep: var(--jm-cobalt-deep);
