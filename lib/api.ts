@@ -25,6 +25,9 @@ export const api = {
   me: () => request<Me>("/v1/me"),
   updateMe: (patch: Partial<UserDefaults>) => request<Me>("/v1/me", { method: "PATCH", body: JSON.stringify(patch) }),
 
+  /** Erases the account and everything in it. Irreversible; the session dies with it. */
+  deleteAccount: () => request<void>("/v1/me", { method: "DELETE" }),
+
   resumes: () => request<{ items: Resume[] }>("/v1/resumes"),
   createResume: (body: { storagePath: string; filename: string; sizeBytes: number }) =>
     request<{ resumeId: string }>("/v1/resumes", { method: "POST", body: JSON.stringify(body) }),

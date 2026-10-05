@@ -157,8 +157,9 @@ export default function PrivacyPage() {
         <p>You can, at any time:</p>
         <ul>
           <li>
-            <strong>Delete your account and everything in it</strong> — in the app, Profile &rarr; Delete my account.
-            This is immediate and cannot be undone.
+            <strong>Delete your account and everything in it</strong> — in the app under Profile &rarr; Delete my
+            account, or on the web at <Link href="/delete-account">jobsmator.com/delete-account</Link>. This is
+            immediate and cannot be undone.
           </li>
           <li>Delete individual resumes or conversations without deleting your account.</li>
           <li>Ask for a copy of the data we hold about you, or for it to be corrected.</li>

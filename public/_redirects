@@ -10,5 +10,6 @@
 /legal/terms      /terms               301
 /support          /#faq                302
 
-# Account deletion (Google Play requires a reachable URL for this).
-/delete-account   /privacy#your-rights 302
+# Account deletion (the stores require a reachable URL; /delete-account is a real page).
+/account-deletion /delete-account      301
+/delete           /delete-account      302
