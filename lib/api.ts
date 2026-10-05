@@ -1,4 +1,4 @@
-import { auth } from "./firebase";
+import { firebaseAuth } from "./firebase";
 import type { CreateRunBody, Job, Me, Resume, Run, UserDefaults } from "./contracts";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
@@ -10,7 +10,7 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const token = await auth.currentUser?.getIdToken();
+  const token = await firebaseAuth().currentUser?.getIdToken();
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
     headers: { "content-type": "application/json", ...(token && { authorization: `Bearer ${token}` }), ...init.headers },

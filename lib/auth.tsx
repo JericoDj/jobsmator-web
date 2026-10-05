@@ -2,21 +2,30 @@
 
 import { onAuthStateChanged, signInWithPopup, signOut as fbSignOut, type User } from "firebase/auth";
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth, googleProvider } from "./firebase";
+import { firebaseAuth, firebaseConfigured, googleProvider } from "./firebase";
 
 type AuthState = { user: User | null; loading: boolean; signInWithGoogle: () => Promise<void>; signOut: () => Promise<void> };
 const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => onAuthStateChanged(auth, (u) => { setUser(u); setLoading(false); }), []);
+  // Nothing to wait for when Firebase has no config — there is no session to resolve.
+  const [loading, setLoading] = useState(firebaseConfigured);
+  useEffect(() => {
+    // Without a web config there is no session to listen for — the public pages
+    // still render, they just never see a signed-in user.
+    if (!firebaseConfigured) return;
+    return onAuthStateChanged(firebaseAuth(), (u) => {
+      setUser(u);
+      setLoading(false);
+    });
+  }, []);
   return (
     <AuthContext.Provider
       value={{
         user, loading,
-        signInWithGoogle: async () => { await signInWithPopup(auth, googleProvider); },
-        signOut: () => fbSignOut(auth),
+        signInWithGoogle: async () => { await signInWithPopup(firebaseAuth(), googleProvider()); },
+        signOut: () => fbSignOut(firebaseAuth()),
       }}
     >
       {children}

@@ -31,10 +31,22 @@ export type UserDefaults = z.infer<typeof UserDefaults>;
 export const SubscriptionPlan = z.enum(["free", "pro"]);
 export type SubscriptionPlan = z.infer<typeof SubscriptionPlan>;
 
+export const SubscriptionSource = z.enum(["none", "voucher", "revenuecat", "manual"]);
+export type SubscriptionSource = z.infer<typeof SubscriptionSource>;
+
+export const SubscriptionPeriod = z.enum(["day", "hour"]);
+export type SubscriptionPeriod = z.infer<typeof SubscriptionPeriod>;
+
 export const SubscriptionInfo = z.object({
   plan: SubscriptionPlan.default("free"),
   searchesUsed: z.number().int().min(0).default(0),
+  /** Backend is the source of truth: free gets 1 search a day, pro gets 5 a day. */
+  searchLimit: z.number().int().min(0),
+  period: SubscriptionPeriod,
   renewsAt: z.string().nullable().default(null),
+  source: SubscriptionSource.default("none"),
+  /** True when `plan` came from RevenueCat and hasn't expired. */
+  entitlementActive: z.boolean().default(false),
 });
 export type SubscriptionInfo = z.infer<typeof SubscriptionInfo>;
 
@@ -53,30 +65,102 @@ export type RegisterResponse = z.infer<typeof RegisterResponse>;
 
 export const Me = z.object({
   id: z.string().uuid(),
+  runId: z.string().uuid().optional(),
   email: z.string().email().nullable(),
   displayName: z.string().nullable(),
   defaults: UserDefaults,
   sheetId: z.string().nullable(),
   subscription: SubscriptionInfo.optional(),
   profile: z.record(z.string(), z.unknown()).optional(),
-  automations: z.array(z.record(z.string(), z.unknown())).optional(),
+  automations: z.array(z.lazy(() => Automation)).optional(),
   settings: z.record(z.string(), z.unknown()).optional(),
 });
 export type Me = z.infer<typeof Me>;
 
+// ---------- automations ----------
+export const AutomationFrequency = z.enum(["daily", "weekdays", "weekly"]);
+export type AutomationFrequency = z.infer<typeof AutomationFrequency>;
+
+export const CreateAutomationBody = z.object({
+  name: z.string().min(1).max(80).optional(),
+  resumeId: z.string().uuid(),
+  interests: z.array(z.string().min(1)).min(1).max(5),
+  sites: z.array(z.enum(JOB_SITES)).min(1),
+  jobsPerSite: z.number().int().min(5).max(50).default(20),
+  frequency: AutomationFrequency,
+  hour: z.number().int().min(0).max(23),
+  minute: z.number().int().min(0).max(59).default(0),
+  weekday: z.number().int().min(0).max(6).optional().describe("0 = Sunday … 6 = Saturday; required for `weekly`"),
+  tzOffsetMinutes: z.number().int().min(-840).max(840).default(0).describe("Client UTC offset in minutes, e.g. 480 for Manila"),
+});
+export type CreateAutomationBody = z.infer<typeof CreateAutomationBody>;
+
+export const UpdateAutomationBody = z.object({
+  name: z.string().min(1).max(80).optional(),
+  enabled: z.boolean().optional(),
+});
+
+export const Automation = z.object({
+  id: z.string().uuid(),
+  runId: z.string().uuid().optional(),
+  name: z.string(),
+  /** Human label, e.g. "Every day · 8:00". */
+  schedule: z.string(),
+  frequency: AutomationFrequency,
+  hour: z.number(),
+  minute: z.number(),
+  weekday: z.number().nullable(),
+  interests: z.array(z.string()),
+  sites: z.array(z.string()),
+  enabled: z.boolean(),
+  lastRunAt: z.string().nullable(),
+  nextRunAt: z.string().nullable(),
+  lastResultCount: z.number().nullable(),
+});
+export type Automation = z.infer<typeof Automation>;
+
 // ---------- resumes ----------
 export const CreateResumeBody = z.object({
-  storagePath: z.string().regex(/^resumes\/[^/]+\/[^/]+$/),
+  storagePath: z.string().regex(/^resumes\/[^/]+\/[^/]+$/).optional(),
+  url: z.string().url().optional(),
   filename: z.string().min(1).max(200),
-  sizeBytes: z.number().int().positive().max(10 * 1024 * 1024),
+  sizeBytes: z.number().int().positive().max(10 * 1024 * 1024).optional(),
+}).refine(data => data.storagePath || data.url, { message: "Must provide either storagePath or url" });
+export const ResumeAnalysis = z.object({
+  summary: z.string(), // 2 sentences on who this person is
+  headline: z.string(), // e.g. "Mid-level Flutter developer, 3 yrs"
+  seniority: z.enum(["entry", "junior", "mid", "senior", "lead"]),
+  strengths: z.array(z.string()).max(5),
+  fixes: z.array(z.string()).max(5), // concrete, actionable
+  skills: z.array(z.string()).max(25), // normalised, lowercase-ish ("flutter", "firebase")
+  roles: z.array(z.string()).max(8), // job titles this resume fits ("Flutter Developer")
+  tags: z.array(z.string()).max(20), // union used for matching: roles + top skills + industries, lowercase, deduped
+  industries: z.array(z.string()).max(5),
 });
-export const Resume = z.object({
+export type ResumeAnalysis = z.infer<typeof ResumeAnalysis>;
+
+export const ResumeAnalysisStatus = z.enum(["pending", "done", "failed"]);
+export type ResumeAnalysisStatus = z.infer<typeof ResumeAnalysisStatus>;
+
+const ResumeBase = z.object({
   id: z.string().uuid(),
+  runId: z.string().uuid().optional(),
   filename: z.string(),
-  sizeBytes: z.number(),
+  sizeBytes: z.number().nullable(),
   createdAt: z.string(),
 });
+export const Resume = ResumeBase.extend({
+  analysis: ResumeAnalysis.nullable().default(null),
+  analyzedAt: z.string().nullable().default(null),
+  analysisStatus: ResumeAnalysisStatus,
+});
 export type Resume = z.infer<typeof Resume>;
+
+export const ResumeMatches = z.object({
+  items: z.array(z.lazy(() => Job)),
+  tags: z.array(z.string()),
+});
+export type ResumeMatches = z.infer<typeof ResumeMatches>;
 
 // ---------- runs ----------
 export const CreateRunBody = z.object({
@@ -96,10 +180,12 @@ export const RunStats = z.object({
   already_processed: z.number(),
   scored: z.number(),
   recommended: z.number(),
+  feedback: z.string().optional(),
   recommended_per_site: z.record(z.string(), z.number()),
 });
 export const Run = z.object({
   id: z.string().uuid(),
+  runId: z.string().uuid().optional(),
   status: RunStatus,
   resumeId: z.string().uuid(),
   request: CreateRunBody.omit({ resumeId: true }),
@@ -114,6 +200,7 @@ export type Run = z.infer<typeof Run>;
 // ---------- jobs ----------
 export const Job = z.object({
   id: z.string().uuid(),
+  runId: z.string().uuid().optional(),
   rank: z.number(),
   score: z.number(),
   tier: Tier,
@@ -126,20 +213,87 @@ export const Job = z.object({
   url: z.string().url(),
   site: z.string(),
   matchedInterest: z.string(),
+  industry: z.string().default(""),
+  /** The source listing returned 404/410 when last checked. */
+  expired: z.boolean().default(false),
   why: z.string(),
   redFlags: z.array(z.string()),
   saved: z.boolean(),
   hidden: z.boolean(),
   applied: z.boolean(),
+  /** The company replied after you applied. */
+  responded: z.boolean(),
+  /** You have (or had) an interview. */
+  interview: z.boolean(),
+  coverLetter: z.string().nullable().optional(),
 });
 export type Job = z.infer<typeof Job>;
 
 export const JobsPage = z.object({
   items: z.array(Job),
   nextCursor: z.string().nullable(),
+  /** Board only: reshuffles left today. */
+  shufflesLeft: z.number().int().optional(),
 });
 
 // ---------- errors ----------
+// ---------- Ask JobsMator ----------
+export const AiRole = z.enum(["user", "assistant"]);
+export type AiRole = z.infer<typeof AiRole>;
+
+export const AiAttachment = z.object({
+  id: z.string().uuid(),
+  filename: z.string(),
+  mimeType: z.string(),
+  sizeBytes: z.number().int(),
+  /** What the model saw: job_posting, resume, screenshot or other. */
+  kind: z.string(),
+  /** The model's description of the image; what later turns refer to. */
+  analysis: z.string().nullable(),
+  /** Short-lived URL for showing the picture in the thread. */
+  url: z.string().url(),
+  createdAt: z.string(),
+});
+export type AiAttachment = z.infer<typeof AiAttachment>;
+
+export const AiMessage = z.object({
+  id: z.string().uuid(),
+  threadId: z.string().uuid(),
+  role: AiRole,
+  content: z.string(),
+  attachments: z.array(AiAttachment).default([]),
+  createdAt: z.string(),
+});
+export type AiMessage = z.infer<typeof AiMessage>;
+
+export const AiThread = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  /** Set when the thread was started from the Tools tab. */
+  tool: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type AiThread = z.infer<typeof AiThread>;
+
+export const SendAiMessageBody = z.object({
+  /** Omit to start a new conversation. */
+  threadId: z.string().uuid().optional(),
+  text: z.string().max(8000).default(""),
+  attachmentIds: z.array(z.string().uuid()).max(4).default([]),
+  /** Start a Tools-tab conversation with this tool's instructions. Only on the first message. */
+  tool: z.string().optional(),
+});
+export type SendAiMessageBody = z.infer<typeof SendAiMessageBody>;
+
+export const SendAiMessageResponse = z.object({
+  thread: AiThread,
+  message: AiMessage,
+  reply: AiMessage,
+  usage: z.object({ used: z.number().int(), limit: z.number().int() }),
+});
+export type SendAiMessageResponse = z.infer<typeof SendAiMessageResponse>;
+
 export const ApiErrorBody = z.object({
   error: z.string(),
   message: z.string(),
@@ -165,7 +319,9 @@ export type EngineRequest = z.infer<typeof EngineRequest>;
 export const EngineJob = z.object({
   rank: z.number(),
   score: z.number(),
-  tier: z.enum(["strong", "good"]),
+  // Engine may label weak matches "skip"/"weak" or omit the tier; the API
+  // recomputes it from score + minScore anyway.
+  tier: z.enum(["strong", "good", "skip", "weak"]).optional(),
   title: z.string(),
   company: z.string().default(""),
   location: z.string().default(""),
@@ -191,6 +347,7 @@ export const EngineResponse = z.object({
     .nullable()
     .optional(),
   jobs: z.array(EngineJob).default([]),
+  recommendation: z.string().optional(),
   generated_at: z.string().optional(),
 });
 export type EngineResponse = z.infer<typeof EngineResponse>;

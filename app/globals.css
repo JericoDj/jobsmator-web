@@ -67,3 +67,11 @@ body {
 }
 h1, h2, h3, h4 { font-family: var(--font-display); color: var(--jm-ink); text-wrap: balance; }
 :focus-visible { outline: 3px solid var(--jm-azure); outline-offset: 2px; }
+
+/*
+ * Panels drawn on the ink background. The `h1–h4` rule above is plain CSS and
+ * therefore beats Tailwind's layered utilities, so a dark section opts in here
+ * rather than fighting it with per-element overrides.
+ */
+.on-dark, .on-dark h1, .on-dark h2, .on-dark h3 { color: #fff; }
+.on-dark :focus-visible { outline-color: #fff; }

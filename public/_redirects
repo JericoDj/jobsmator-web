@@ -1,0 +1,14 @@
+# Netlify redirects. Next.js routing is handled by the runtime plugin; these
+# are our own rules, applied in order, first match wins.
+
+# Short links people type or that appear in the apps and store listings.
+/app              /upload              302
+/login            /sign-in             302
+/signin           /sign-in             302
+/privacy-policy   /privacy             301
+/legal/privacy    /privacy             301
+/legal/terms      /terms               301
+/support          /#faq                302
+
+# Account deletion (Google Play requires a reachable URL for this).
+/delete-account   /privacy#your-rights 302
