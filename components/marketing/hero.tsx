@@ -60,7 +60,7 @@ export function Hero() {
           </div>
 
           <PhoneFrame
-            src="/shots/app-jobs-board.png"
+            src="/shots/app-jobs-board@2.png"
             alt="The JobsMator app showing a job database with four new matches, two applied, and listings picked for Flutter Developer and Mobile Engineer roles."
           />
         </div>
