@@ -67,3 +67,42 @@ h1, h2, h3, h4 { font-family: var(--font-display); color: var(--jm-ink); text-wr
  */
 .on-dark, .on-dark h1, .on-dark h2, .on-dark h3 { color: #fff; }
 .on-dark :focus-visible { outline-color: #fff; }
+
+/*
+ * Glass surfaces. Saturation is what sells it — a plain blur goes milky and
+ * flat, while boosting saturation keeps the colour of whatever is behind.
+ * `-webkit-` first for Safari, which still needs the prefix.
+ */
+.glass {
+  background-color: color-mix(in srgb, var(--jm-ground) 72%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .glass { background-color: color-mix(in srgb, var(--jm-ground) 96%, transparent); }
+}
+
+/*
+ * A faint paper grain over the hero. Flat gradients are what make a landing
+ * page look machine-made; a little noise gives the surface a texture to catch.
+ */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Hairline grid, used behind the hero so the wash has structure under it. */
+.grid-lines {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--jm-line) 55%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--jm-line) 55%, transparent) 1px, transparent 1px);
+  background-size: 72px 72px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

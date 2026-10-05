@@ -1,68 +1,90 @@
 import { site } from "@/lib/content/site";
 import { ButtonLink, Icon } from "@/components/ui";
-import { ResultsPreview } from "./results-preview";
+import { PhoneFrame } from "./phone-frame";
 
 /**
- * The promise, the one action, and proof — a real-looking shortlist sitting
- * beside the words rather than a stock photo, because the ranked list *is*
- * the product. The wash behind it is the same cobalt→azure pair the app's
- * search card uses.
+ * The opening. Structure before decoration: a hairline grid and a single soft
+ * wash, the headline set tight with the operative line picked out in cobalt,
+ * and the real app on the right — an actual screenshot rather than a drawing
+ * of one, because the shortlist is the thing being sold.
  */
 export function Hero() {
   return (
-    <section className="relative overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60rem_40rem_at_78%_-10%,var(--jm-cobalt-tint),transparent_70%),radial-gradient(45rem_32rem_at_8%_18%,var(--jm-azure-tint),transparent_72%)]"
-      />
-      <div className="mx-auto w-full max-w-6xl px-6 pb-20 pt-16 sm:pb-28 sm:pt-24">
-        <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr]">
-          <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-line bg-card px-3 py-1.5 text-xs font-semibold text-cobalt-deep">
-              <Icon name="sparkles" size={14} />
-              {site.tagline}
+    <section className="grain relative isolate overflow-hidden">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-20">
+        <div className="grid-lines absolute inset-0 [mask-image:radial-gradient(70%_60%_at_50%_0%,#000,transparent)]" />
+        <div className="absolute -top-40 right-[-10%] h-[36rem] w-[36rem] rounded-full bg-[var(--jm-cobalt-tint)] blur-3xl opacity-70" />
+        <div className="absolute -left-32 top-40 h-[28rem] w-[28rem] rounded-full bg-[var(--jm-azure-tint)] blur-3xl opacity-60" />
+      </div>
+
+      <div className="mx-auto w-full max-w-6xl px-6 pb-16 pt-14 sm:pb-24 sm:pt-20">
+        <div className="grid items-center gap-16 lg:grid-cols-[1.08fr_0.92fr]">
+          <div className="max-w-xl">
+            <p className="flex items-center gap-2.5 text-[13px] font-medium text-muted">
+              <span className="inline-flex h-1.5 w-1.5 rounded-full bg-match" />
+              Built in the Philippines for Philippine and remote roles
             </p>
 
-            <h1 className="mt-6 text-[2.6rem] font-bold leading-[1.08] tracking-tight sm:text-6xl">
-              {site.headline}
+            <h1 className="mt-6 text-[2.75rem] font-bold leading-[1.04] tracking-[-0.03em] sm:text-[3.75rem]">
+              Ten job sites,
+              <br />
+              read for you,
+              <br />
+              <span className="text-cobalt">ranked for you.</span>
             </h1>
 
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted">{site.subhead}</p>
+            <p className="mt-6 text-[1.0625rem] leading-relaxed text-muted sm:text-lg">{site.subhead}</p>
 
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <ButtonLink href="/sign-in" size="lg">
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <ButtonLink href="/sign-in" size="lg" className="shadow-[0_10px_24px_-10px_rgba(30,94,255,.8)]">
                 Find matching jobs
                 <Icon name="arrow" size={18} />
               </ButtonLink>
-              <ButtonLink href="/#how" variant="secondary" size="lg">
+              <ButtonLink href="/#how" variant="ghost" size="lg" className="px-2 sm:px-4">
                 See how it works
               </ButtonLink>
             </div>
 
-            <p className="mt-4 text-sm text-faint">Free to start · No card needed · Your resume stays private</p>
+            <dl className="mt-10 flex flex-wrap gap-x-10 gap-y-4 border-t border-line pt-7">
+              {[
+                { k: "10", v: "job sites, one search" },
+                { k: "0–100", v: "score, with the reason" },
+                { k: "₱0", v: "to start, no card" },
+              ].map((s) => (
+                <div key={s.v}>
+                  <dt className="font-display text-2xl font-bold leading-none tracking-tight text-ink">{s.k}</dt>
+                  <dd className="mt-1.5 text-[13px] text-muted">{s.v}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
 
-          <ResultsPreview />
+          <PhoneFrame
+            src="/shots/app-jobs-board.png"
+            alt="The JobsMator app showing a job database with four new matches, two applied, and listings picked for Flutter Developer and Mobile Engineer roles."
+          />
         </div>
-
-        <SiteStrip />
       </div>
+
+      <SiteStrip />
     </section>
   );
 }
 
-/** Quiet proof of breadth: the boards, named, with no logos to licence. */
+/** The boards, named. Quiet proof of breadth with no logos to licence. */
 function SiteStrip() {
   return (
-    <div className="mt-16 border-t border-line pt-8 sm:mt-20">
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-faint">Searched in one go</p>
-      <ul className="mt-4 flex flex-wrap gap-x-7 gap-y-3">
-        {site.jobSites.map((name) => (
-          <li key={name} className="text-sm font-semibold text-muted">
-            {name}
-          </li>
-        ))}
-      </ul>
+    <div className="border-y border-line bg-ground/60">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:gap-10">
+        <p className="shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-faint">Searched in one go</p>
+        <ul className="flex flex-wrap gap-x-6 gap-y-2">
+          {site.jobSites.map((name) => (
+            <li key={name} className="text-sm font-semibold text-muted">
+              {name}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

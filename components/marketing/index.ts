@@ -1,4 +1,5 @@
 export * from "./hero";
+export * from "./phone-frame";
 export * from "./how-it-works";
 export * from "./features";
 export * from "./results-preview";
